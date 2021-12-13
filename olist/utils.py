@@ -42,3 +42,28 @@ def plot_kde_plot(df, variable, dimension):
                       hue=dimension,
                       col=dimension)
     g.map(sns.kdeplot, variable)
+
+def get_financials(df):
+    """
+    Returns a df with 'revenue', 'costs', 'it_costs', '
+    """
+    df['months_of_sales']=((df['date_last_sale']-df['date_first_sale']).dt.days+1)*(12/365)
+    df['monthly_sales']=(df['sales']/(df['months_of_sales']))*0.1+80
+    df['month_integer']=df['months_of_sales'].apply(lambda x: int(x)+1)
+
+    df['monthly_costs']=((df['share_of_one_stars']*df['n_orders']*100)+df['share_of_two_stars']*df['n_orders']*50+df['share_of_three_stars']*df['n_orders']*40)/(df['months_of_sales'])
+    #calculating IT costs contribution     0.5MM=k*sqrt(total_orders)  for each seller: ITCost=k*sqrt(n_order)
+    df['monthly_costs_IT']=0
+    #total cost
+    totalcost=500000
+    #sum square orders of Olist
+    total_orders=(df['n_orders']).sum()
+    #calculating k
+    k=totalcost/((total_orders)**0.5)
+    #calculating each seller cost
+    df['monthly_costs_IT']=((df['n_orders']/total_orders)*totalcost)/(df['months_of_sales'])
+    df['monthly_costs_total']=df['monthly_costs']+df['monthly_costs_IT']
+
+    df['monthly_profit']=df['monthly_sales']-df['monthly_costs_total']
+
+    return df
