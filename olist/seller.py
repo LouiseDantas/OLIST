@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from olist.data import Olist
 from olist.order import Order
+from olist.utils import get_financials
 
 
 class Seller:
@@ -132,7 +133,6 @@ class Seller:
         Returns a DataFrame with:
         'seller_id', 'n_orders', 'quantity', 'quantity_per_order'
         """
-        # Hint: Here, you cannot start from the `matching_table`
         order_items = self.data['order_items']
 
         n_orders = order_items.groupby('seller_id')['order_id']\
@@ -152,7 +152,7 @@ class Seller:
     def get_sales(self):
         """
         Returns a DataFrame with:
-        'seller_id', 'sales'
+        'revenue', 'costs','costs_IT,'profit'
         """
         return self.data['order_items'][['seller_id', 'price']]\
             .groupby('seller_id')\
@@ -179,5 +179,6 @@ class Seller:
         df_training_data=df_training_data.merge(df_get_review_score,how='inner',on='seller_id')
         df_training_data=df_training_data.merge(df_get_quantity,how='inner',on='seller_id')
         df_training_data=df_training_data.merge(df_get_sales,how='inner',on='seller_id')
+        df_training_data=get_financials(df_training_data)
 
         return df_training_data
